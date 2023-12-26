@@ -63,8 +63,8 @@ class ReservationController extends Controller
         })->toArray();
 
         // Check if the selected date and time is within the allowed time range (10:00 to 20:00)
-        $allowedStartTime = Carbon::now()->setTime(10, 0, 0);
-        $allowedEndTime = Carbon::now()->setTime(20, 0, 1);
+        $allowedStartTime = $selectedDateTime->copy()->setTime(10, 0, 0);
+        $allowedEndTime = $selectedDateTime->copy()->setTime(20, 0, 1);
 
         if ($selectedDateTime->lessThan($allowedStartTime) || $selectedDateTime->greaterThanOrEqualTo($allowedEndTime)) {
             // The selected time is outside the allowed time range
