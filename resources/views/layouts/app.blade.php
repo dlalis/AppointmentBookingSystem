@@ -30,18 +30,35 @@
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
 
-                    <a class="navbar-brand" href="{{ url('/home') }}">
+                @if(auth()->check())
+                    <a class="navbar-brand" href="{{ url($user->id) }}/home">
                         Jim Appointment
                     </a>
+                @else
+                    <a class="navbar-brand" href="/">
+                        Jim Appointment
+                    </a>
+                @endif
+
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                         <span class="navbar-toggler-icon"></span>
                     </button>
 
 
                 <div class="justify-content-center">
-                    <a class="nav-item navbar-brand" href="{{ url('/') }}"> Index </a>
+                    @if(auth()->check())
+                        <a class="nav-item navbar-brand" href="{{ url($user->id) }}/"> Index </a>
+                    @else
+                        <a class="nav-item navbar-brand" href="{{ url('/') }}"> Index </a>
+                    @endif
 
-                    <a class="nav-item navbar-brand" href="{{ url('/home') }}"> Home </a>
+
+
+                    @if(auth()->check())
+                     <a class="nav-item navbar-brand" href="{{ url($user->id) }}/home"> Home </a>
+                    @else
+                        <a class="nav-item navbar-brand" href="/"> Home </a>
+                    @endif
 
                     <!-- Validate user log in and if it's admin, show a button for Admin Page -->
                     @if (auth()->check() && auth()->user()->isAdmin)

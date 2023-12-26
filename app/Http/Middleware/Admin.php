@@ -18,7 +18,7 @@ class Admin
     {
         //If not logged and is not admin, then produce an 403 error.
         if(!auth()->check() || !auth()->user()->isAdmin)
-            abort(403);
+            abort(403, 'Unauthorized action.');
 
         return $next($request);
     }
