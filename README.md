@@ -10,6 +10,8 @@
 - Reservation showed in home page of each user, with edit/delete button
 - Middleware for User-Admin, plus check on Controller, protect from Unauthorized actions, like accessing other user page.
 - Bootstrap 5
+- Seeders: 2 users, 10 Reservations
+- Default seeder password: 1 to 9
 
 ## Getting Started
 
@@ -21,7 +23,8 @@
 
 1. [Typical installation of Laravel plus DB connection via .env]
 2. [php artisan migrate -> Installing all the Database migrations]
-3. [php artisan serve -> Runs the app on localhost usually on http://127.0.0.1:8000]
+3. [php artisan db:seed -> Create 2 Users and 10 Reservations]
+4. [php artisan serve -> Runs the app on localhost usually on http://127.0.0.1:8000]
 
 ## Acknowledgments
 
