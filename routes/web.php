@@ -19,8 +19,6 @@ use App\Http\Controllers\ReservationCreateController;
 |
 */
 
-//Route::get('/', function () { return view('index'); } );
-
 Auth::routes();
 
 Route::get('/', [IndexController::class, 'redirects'])->name('index');
@@ -40,7 +38,6 @@ Route::middleware(['auth', 'user.access'])->group(function () {
 //Admin
 Route::middleware(['auth', 'admin.access'])->group(function () {
     Route::get('/{user}/admin', [AdminController::class, 'index'])->name('admin.index');
-//    Route::get('/{user}/admin/reservations', [AdminController::class, 'index'])->name('admin.reservations');
     Route::get('/{user}/admin/create', [AdminController::class, 'create'])->name('admin.create');
     Route::post('/{user}/admin/store', [AdminController::class, 'store'])->name('admin.store');
     Route::get('/{user}/admin/edit/{reservation}', [AdminController::class, 'edit'])->name('admin.edit');

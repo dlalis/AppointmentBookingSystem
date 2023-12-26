@@ -34,10 +34,14 @@ class ReservationController extends Controller
 
     public function create(User $user, Request $request)
     {
-        $reservation = $request->session()->get('reservations');
-        $min_date = Carbon::today();
-        $max_date = Carbon::now()->addWeek();
-        return view('home.reservations.create', compact('user','reservation', 'min_date', 'max_date'));
+        if (ReservationController::authenticate($user)) {
+            $reservation = $request->session()->get('reservations');
+            $min_date = Carbon::today();
+            $max_date = Carbon::now()->addWeek();
+            return view('home.reservations.create', compact('user', 'reservation', 'min_date', 'max_date'));
+        }
+        else
+            abort(403, 'Unauthorized action.');
     }
 
     public function store(Request $request)
@@ -93,8 +97,6 @@ class ReservationController extends Controller
         ]);
 
         return redirect(auth()->user()->id . '/home');
-//        return redirect()->route(auth()->user()->id . '/home')->with('success', 'Reservation updated successfully!');
-
     }
 
     /**
@@ -104,7 +106,6 @@ class ReservationController extends Controller
     {
         $reservation->delete();
 
-//        return redirect()->route('home.index', ['user' => $user->id]);
         return redirect(auth()->user()->id . '/home');
     }
 

@@ -30,8 +30,6 @@ class AdminController extends Controller
         }
     }
 
-
-
     public function create(User $user, Request $request)
     {
         $reservation = $request->session()->get('reservations');
@@ -89,8 +87,6 @@ class AdminController extends Controller
         ]);
 
         return redirect(auth()->user()->id . '/admin');
-//        return redirect()->route(auth()->user()->id . '/home')->with('success', 'Reservation updated successfully!');
-
     }
 
     /**
@@ -99,8 +95,6 @@ class AdminController extends Controller
     public function destroy(User $user, Reservation $reservation)
     {
         $reservation->delete();
-
-//        return redirect()->route('home.index', ['user' => $user->id]);
         return redirect(auth()->user()->id . '/home');
     }
 }

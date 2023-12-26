@@ -15,7 +15,6 @@ class CreateResarvationsTable extends Migration
     {
         Schema::create('reservations', function (Blueprint $table) {
             $table->id();
-//            $table->unsignedBigInteger('user_id');
             $table->foreignId('user_id')->constrained();
             $table->String('first_name');
             $table->String('last_name');
