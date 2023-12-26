@@ -23,8 +23,13 @@ class ReservationController extends Controller
 
     public function index(User $user)
     {
-        $reservations = Reservation::where('user_id', $user->id)->get();
-        return view('home.index', compact('user','reservations'));
+        if (ReservationController::authenticate($user)) {
+            $reservations = Reservation::where('user_id', $user->id)->get();
+            return view('home.index', compact('user','reservations'));
+        } else {
+            // Unauthorized access
+            abort(403, 'Unauthorized action.');
+        }
     }
 
     public function create(User $user, Request $request)
@@ -50,23 +55,21 @@ class ReservationController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
      * Show the form for editing the specified resource.
      */
-    public function edit($user, $id)
+    public function edit(User $user, $id)
     {
-        $user = Auth::user();
         $reservation = Reservation::findOrFail($id);
 
-        return view('home.reservations.edit', compact('user', 'reservation'));
-
+        //prevent user access/edit other user reservations
+        if (ReservationController::authenticate($user) && $reservation->user_id == $user->id) {
+            $min_date = Carbon::today();
+            $max_date = Carbon::now()->addWeek();
+            return view('home.reservations.edit', compact('user', 'reservation', 'min_date', 'max_date'));
+        } else {
+            // Unauthorized access
+            abort(403, 'Unauthorized action.');
+        }
     }
 
     /**
@@ -103,5 +106,13 @@ class ReservationController extends Controller
 
 //        return redirect()->route('home.index', ['user' => $user->id]);
         return redirect(auth()->user()->id . '/home');
+    }
+
+    public function authenticate(User $user): bool
+    {
+        if(auth()->user()->id == $user->id)
+            return true;
+
+        return false;
     }
 }

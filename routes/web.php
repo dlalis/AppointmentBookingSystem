@@ -23,36 +23,28 @@ use App\Http\Controllers\ReservationCreateController;
 
 Auth::routes();
 
-Route::get('/home', [IndexController::class, 'redirects'])->name('home');
 Route::get('/', [IndexController::class, 'redirects'])->name('index');
-Route::get('/{user}', [ReservationController::class, 'index'])->name('index');
+Route::get('/home', [IndexController::class, 'redirects'])->name('home');
 
-//option 1
-Route::get('/{user}/home', [ReservationController::class, 'index'])->name('index');
-Route::get('/{user}/home/create', [ReservationController::class, 'create'])->name('home.create');
-Route::post('/home/store', [ReservationController::class, 'store'])->name('home.store');
-//Route::get('/home/store', [ReservationController::class, 'store'])->name('home.store');
-Route::get('/{user}/home/storeReservation', [ReservationController::class, 'storeReservation'])->name('/{user}/home.storeReservation');
-
-//Route::get('/{user}/home/edit', [ReservationController::class, 'edit'])->name('home.edit');
-Route::get('/{user}/home/edit/{reservation}', [ReservationController::class, 'edit'])->name('home.edit');
-Route::put('/{user}/home/update/{reservation}', [ReservationController::class, 'update'])->name('home.update');
-
-Route::get('/{user}/home/destroy/{reservation}', [ReservationController::class, 'destroy'])->name('home.destroy');
-Route::delete('/{user}/home/destroy/{reservation}', [ReservationController::class, 'destroy'])->name('home.destroy');
-
-/* Option 2
-Route::middleware(['auth', 'home'])->name('home.')->prefix('home')->group(function() {
-    Route::get('/', [HomeController::class, 'index'])->name('index');
-    Route::get('/create', [ReservationController::class, 'create'])->name('create');
-    Route::get('/store', [ReservationController::class, 'store'])->name('store');
-    Route::get('/storeReservation', [ReservationController::class, 'storeReservation'])->name('storeReservation');
-//    Route::resource('/create', ReservationCreateController::class);
+Route::middleware(['auth', 'user.access'])->group(function () {
+    Route::get('/{user}', [ReservationController::class, 'index'])->name('index');
+    Route::get('/{user}/home', [ReservationController::class, 'index'])->name('home.index');
+    Route::get('/{user}/home/create', [ReservationController::class, 'create'])->name('home.create');
+    Route::post('/home/store', [ReservationController::class, 'store'])->name('home.store');
+    Route::get('/{user}/home/edit/{reservation}', [ReservationController::class, 'edit'])->name('home.edit');
+    Route::put('/{user}/home/update/{reservation}', [ReservationController::class, 'update'])->name('home.update');
+    Route::get('/{user}/home/destroy/{reservation}', [ReservationController::class, 'destroy'])->name('home.destroy');
+    Route::delete('/{user}/home/destroy/{reservation}', [ReservationController::class, 'destroy'])->name('home.destroy');
 });
-*/
 
 //Admin
-Route::middleware(['auth', 'admin'])->name('admin.')->prefix('admin')->group(function() {
-    Route::get('/', [AdminController::class, 'index'])->name('admin');
-    Route::resource('/reservations', AdminReservationController::class);
+Route::middleware(['auth', 'admin.access'])->group(function () {
+    Route::get('/{user}/admin', [AdminController::class, 'index'])->name('admin.index');
+//    Route::get('/{user}/admin/reservations', [AdminController::class, 'index'])->name('admin.reservations');
+    Route::get('/{user}/admin/create', [AdminController::class, 'create'])->name('admin.create');
+    Route::post('/{user}/admin/store', [AdminController::class, 'store'])->name('admin.store');
+    Route::get('/{user}/admin/edit/{reservation}', [AdminController::class, 'edit'])->name('admin.edit');
+    Route::put('/{user}/admin/update/{reservation}', [AdminController::class, 'update'])->name('admin.update');
+    Route::get('/{user}/admin/destroy/{reservation}', [AdminController::class, 'destroy'])->name('admin.destroy');
+    Route::delete('/{user}/admin/destroy/{reservation}', [AdminController::class, 'destroy'])->name('admin.destroy');
 });

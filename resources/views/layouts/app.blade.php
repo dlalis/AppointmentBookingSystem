@@ -62,7 +62,7 @@
 
                     <!-- Validate user log in and if it's admin, show a button for Admin Page -->
                     @if (auth()->check() && auth()->user()->isAdmin)
-                        <a class="nav-item navbar-brand" href="{{ url('/admin') }}"> Admin </a>
+                        <a class="nav-item navbar-brand" href="{{ route("admin.index", ['user' => $user->id]) }}"> Admin </a>
                     @endif
                 </div>
 

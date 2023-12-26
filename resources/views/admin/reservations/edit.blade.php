@@ -5,7 +5,7 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="align-content-center">
-                    <form method="POST" action="{{ route('home.update', ['user' => $user->id, 'reservation' => $reservation->id]) }}">
+                    <form method="POST" action="{{ route('admin.update', ['user' => $user->id, 'reservation' => $reservation->id]) }}">
                         @csrf
                         @method('PUT')
 
@@ -25,14 +25,12 @@
                             <input type="text" id="tel_number" name="tel_number" value="{{ $reservation->tel_number }}" class="form-control">
                         </div>
 
-
-
                         <div class="form-group">
                             <label for="res_date">Reservation Date</label>
                             <input type="datetime-local" id="res_date" name="res_date"
                                    min="{{ $min_date->format('Y-m-d\TH:i:s') }}"
                                    max="{{ $max_date->format('Y-m-d\TH:i:s') }}"
-                                   value="{{ $reservation ? $reservation->res_date->format('Y-m-d\TH:i:s') : '' }}"
+                                   value="{{  $reservation ? $reservation->res_date->format('Y-m-d\TH:i:s') : ''}}"
                                    class="form-control">
                         </div>
 
