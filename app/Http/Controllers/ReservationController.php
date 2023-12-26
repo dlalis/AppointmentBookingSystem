@@ -53,6 +53,33 @@ class ReservationController extends Controller
             'tel_number' => ['required'],
             'res_date' => ['required', 'date', new DateBetween, new TimeBetween],
         ]);
+
+        // Get the selected reservation date from the request and set the timezone to Greece/Athens
+        $selectedDateTime = Carbon::parse($request->input('res_date'));//->timezone('Europe/Athens');
+
+        // Get all reservation dates from the database and set the timezone to Greece/Athens
+        $allReservationDates = Reservation::pluck('res_date')->map(function ($date) {
+            return Carbon::parse($date);//->timezone('Europe/Athens');
+        })->toArray();
+
+        // Check if the selected date and time is within the allowed time range (10:00 to 20:00)
+        $allowedStartTime = Carbon::now()->setTime(10, 0, 0);
+        $allowedEndTime = Carbon::now()->setTime(20, 0, 1);
+
+        if ($selectedDateTime->lessThan($allowedStartTime) || $selectedDateTime->greaterThanOrEqualTo($allowedEndTime)) {
+            // The selected time is outside the allowed time range
+            return redirect()->back()->withErrors(['res_date' => 'Appointments can only be made between 10:00 and 20:00.']);
+        }
+
+        // Check if the selected date and time overlaps with any existing reservation
+        foreach ($allReservationDates as $reservation) {
+            // Check if there is an overlap within the 1-hour duration
+            if ($selectedDateTime->greaterThanOrEqualTo($reservation) && $selectedDateTime->lessThan($reservation->copy()->addHour())) {
+                // The selected time overlaps with an existing reservation
+                return redirect()->back()->withErrors(['res_date' => 'The selected time overlaps with an existing reservation.']);
+            }
+        }
+
         $request->user()->reservations()->create($data);
 
         return redirect(auth()->user()->id . '/home');
