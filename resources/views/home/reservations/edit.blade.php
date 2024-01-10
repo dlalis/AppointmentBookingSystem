@@ -35,6 +35,10 @@
                                    value="{{ $reservation ? $reservation->res_date->format('Y-m-d\TH:i:s') : '' }}"
                                    class="form-control">
                         </div>
+                        <span class="text-xs">Working hours: 10:00-21:00.</span>
+                        @error('res_date')
+                        <div class="text-sm text-red-400">{{ $message }}</div>
+                        @enderror
 
                         <div class="mt-6 p-4 flex justify-end">
                             <button type="submit" class="btn btn-primary">Update</button>

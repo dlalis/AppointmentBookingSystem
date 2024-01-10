@@ -24,7 +24,7 @@ class ReservationController extends Controller
     public function index(User $user)
     {
         if (ReservationController::authenticate($user)) {
-            $reservations = Reservation::where('user_id', $user->id)->get();
+            $reservations =  $user->reservations()->get();
             return view('home.index', compact('user','reservations'));
         } else {
             // Unauthorized access
@@ -54,15 +54,10 @@ class ReservationController extends Controller
             'res_date' => ['required', 'date', new DateBetween, new TimeBetween],
         ]);
 
-        // Get the selected reservation date from the request and set the timezone to Greece/Athens
-        $selectedDateTime = Carbon::parse($request->input('res_date'));//->timezone('Europe/Athens');
+        // Get the selected reservation date from the request
+        $selectedDateTime = Carbon::parse($request->input('res_date'));
 
-        // Get all reservation dates from the database and set the timezone to Greece/Athens
-        $allReservationDates = Reservation::pluck('res_date')->map(function ($date) {
-            return Carbon::parse($date);//->timezone('Europe/Athens');
-        })->toArray();
-
-        // Check if the selected date and time is within the allowed time range (10:00 to 20:00)
+        // Check if the selected date and time is within the allowed time range (10:00 to 21:00) - Last appointment should be at 20:00.
         $allowedStartTime = $selectedDateTime->copy()->setTime(10, 0, 0);
         $allowedEndTime = $selectedDateTime->copy()->setTime(20, 0, 1);
 
@@ -72,12 +67,15 @@ class ReservationController extends Controller
         }
 
         // Check if the selected date and time overlaps with any existing reservation
-        foreach ($allReservationDates as $reservation) {
-            // Check if there is an overlap within the 1-hour duration
-            if ($selectedDateTime->greaterThanOrEqualTo($reservation) && $selectedDateTime->lessThan($reservation->copy()->addHour())) {
-                // The selected time overlaps with an existing reservation
-                return redirect()->back()->withErrors(['res_date' => 'The selected time overlaps with an existing reservation.']);
-            }
+        // Also add a second to hour, so we can close an appointment when another one ends, ex. after reservation of 13:00 we can close one at 14:00 and not at 14:01.
+        $existingAppointment = Reservation::whereBetween('res_date', [
+            $selectedDateTime->copy()->subHour()->addSecond(),
+            $selectedDateTime->copy()->addHour()->subSecond(),
+        ])->first();
+
+        // The selected time overlaps with an existing reservation
+        if ($existingAppointment) {
+            return redirect()->back()->withErrors(['res_date' => 'The selected time overlaps with an existing reservation.']);
         }
 
         $request->user()->reservations()->create($data);
@@ -116,6 +114,31 @@ class ReservationController extends Controller
         ]);
 
         $reservation = Reservation::findOrFail($id);
+
+        // Get the selected reservation date from the request
+        $selectedDateTime = Carbon::parse($request->input('res_date'));
+
+        // Check if the selected date and time is within the allowed time range (10:00 to 21:00) - Last appointment should be at 20:00.
+        $allowedStartTime = $selectedDateTime->copy()->setTime(10, 0, 0);
+        $allowedEndTime = $selectedDateTime->copy()->setTime(20, 0, 1);
+
+        if ($selectedDateTime->lessThan($allowedStartTime) || $selectedDateTime->greaterThanOrEqualTo($allowedEndTime)) {
+            // The selected time is outside the allowed time range
+            return redirect()->back()->withErrors(['res_date' => 'Appointments can only be made between 10:00 and 20:00.']);
+        }
+
+        // Check if the selected date and time overlaps with any existing reservation
+        // Also add a second to hour, so we can close an appointment when another one ends, ex. after reservation of 13:00 we can close one at 14:00 and not at 14:01.
+        $existingAppointment = Reservation::whereBetween('res_date', [
+            $selectedDateTime->copy()->subHour()->addSecond(),
+            $selectedDateTime->copy()->addHour()->subSecond(),
+        ])->first();
+
+        // The selected time overlaps with an existing reservation
+        if ($existingAppointment) {
+            return redirect()->back()->withErrors(['res_date' => 'The selected time overlaps with an existing reservation.']);
+        }
+
         $reservation->update([
             'first_name' => $request->input('first_name'),
             'last_name' => $request->input('last_name'),
@@ -136,7 +159,7 @@ class ReservationController extends Controller
         return redirect(auth()->user()->id . '/home');
     }
 
-    public function authenticate(User $user): bool
+    public static function authenticate(User $user): bool
     {
         if(auth()->user()->id == $user->id)
             return true;
